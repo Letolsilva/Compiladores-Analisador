@@ -118,6 +118,13 @@ class IntermediateCodeGenerator:
 
         self.emit('LABEL', end_label, 'NONE', 'NONE')
         return i
+        
+    def handle_loop_execution(self, tokens: List[Lexeme], i: int, start_label: str, end_label: str, _isIncreasing = False, var_name = None) -> int:
+        if tokens[i].token_type in {'BREAK', 'CONTINUE'}:
+            i = self.handle_loop_interruption(tokens, i, start_label, end_label, _isIncreasing, var_name)
+        else:
+            i = self._handle_command(tokens, i)
+        return i
 
     def _handle_while(self, tokens: List[Lexeme], i: int) -> int:
         start_label = self.new_label()
@@ -144,12 +151,13 @@ class IntermediateCodeGenerator:
         if tokens[i].token_type == 'BEGIN':
             i += 1
             while tokens[i].token_type != 'END':
-                i = self._handle_command(tokens, i)
+                i = self.handle_loop_execution(tokens, i, start_label, end_label)
             i += 1  # pula END
             if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
                 i += 1
         else:
-            i = self._handle_command(tokens, i)
+            i = self.handle_loop_execution(tokens, i, start_label, end_label)
+
 
         self.emit('JUMP', start_label, 'NONE', 'NONE')
         self.emit('LABEL', end_label, 'NONE', 'NONE')
@@ -173,12 +181,13 @@ class IntermediateCodeGenerator:
 
         self.emit('LABEL', start_label, 'NONE', 'NONE')
 
+        isIncreasing = direction == 'TO'
         # Verifica a condição do loop
         temp = self.new_temp()
-        if direction == 'TO':
-            self.emit('LE', var_name, end_value, temp)
-        elif direction == 'DOWNTO':
-            self.emit('GE', var_name, end_value, temp)
+        if isIncreasing:
+            self.emit('LEQ', var_name, end_value, temp)
+        else:
+            self.emit('GEQ', var_name, end_value, temp)
 
         self.emit('IF', temp, body_label, end_label)
 
@@ -191,27 +200,26 @@ class IntermediateCodeGenerator:
         if tokens[i].token_type == 'BEGIN':
             i += 1
             while tokens[i].token_type != 'END':
-                i = self._handle_command(tokens, i)
+                i = self.handle_loop_execution(tokens, i, start_label, end_label, var_name, isIncreasing)
             i += 1  # END
             if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
                 i += 1
         else:
-            i = self._handle_command(tokens, i)
+            i = self.handle_loop_execution(tokens, i, start_label, end_label, var_name, isIncreasing)
 
         # Incremento ou decremento
-        one = '1'
         temp2 = self.new_temp()
-        if direction == 'TO':
-            self.emit('ADD', var_name, one, temp2)
+        if isIncreasing:
+            self.emit('ADD', temp2, temp2, 1)
         else:
-            self.emit('SUB', var_name, one, temp2)
+            self.emit('SUB', temp2, var_name, 1)
         self.emit('ATT', var_name, temp2, 'NONE')
 
         self.emit('JUMP', start_label, 'NONE', 'NONE')
         self.emit('LABEL', end_label, 'NONE', 'NONE')
 
         return i
-
+    
     def _handle_boolean_expression(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
         """
         Trata expressões booleanas com NOT, AND, OR.
@@ -300,7 +308,27 @@ class IntermediateCodeGenerator:
         # Skip tokens until semicolon
         while i < len(tokens) and tokens[i].token_type != 'SEMICOLON':
             i += 1
-        return i + 1
+        return i + 1 
+
+    def handle_loop_interruption(self, tokens: List[Lexeme], i: int, start_label: str, end_label: str, _isIncreasing: bool, var_name:str) -> int:
+        tok = tokens[i]
+
+        if tok.token_type == 'BREAK':
+            self.emit('JUMP', end_label, 'NONE', 'NONE')
+            return i + 1
+
+        elif tok.token_type == 'CONTINUE':
+            if var_name != None: #eh for loop
+                temp2 = self.new_temp()
+                if _isIncreasing:
+                    self.emit('ADD', temp2, temp2, 1)
+                else:
+                    self.emit('SUB', temp2, var_name, 1)
+                self.emit('ATT', var_name, temp2, 'NONE')
+            self.emit('JUMP', start_label, 'NONE', 'NONE')
+            return i + 1
+
+        return i
 
     def save_to_file(self, filepath: str):
         """Write the intermediate code instructions to a file."""
