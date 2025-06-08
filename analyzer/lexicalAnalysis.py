@@ -225,6 +225,8 @@ class LexicalAnalysis:
 
         if identifier in TokenType.RESERVED_WORDS:
             self._add_token(TokenType.RESERVED_WORDS[identifier], identifier)
+        elif identifier in TokenType.LOGICAL_OPERATORS: # and,or ou not
+            self._add_token(TokenType.LOGICAL_OPERATORS[identifier], identifier)
         else:
             self._add_token("IDENTIFIER", identifier)
 
