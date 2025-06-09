@@ -79,42 +79,45 @@ class IntermediateCodeGenerator:
 
         self.emit('IF', temp, true_label, false_label)
 
-        # Parte do THEN
+        # THEN
         self.emit('LABEL', true_label, 'NONE', 'NONE')
         i += 4  # pula IF condicional
         if tokens[i].token_type == 'THEN':
             i += 1
 
-        # Verifica se o THEN começa com BEGIN
         if tokens[i].token_type == 'BEGIN':
             i += 1
             while tokens[i].token_type != 'END':
-                i = self._handle_command(tokens, i)
+                if tokens[i].token_type == 'IF':
+                    i = self._handle_if(tokens, i)
+                else:
+                    i = self._handle_command(tokens, i)
             i += 1  # pula END
-            if tokens[i].token_type == 'SEMICOLON':
-                i += 1
         else:
-            i = self._handle_command(tokens, i)
+            if tokens[i].token_type == 'IF':
+                i = self._handle_if(tokens, i)
+            else:
+                i = self._handle_command(tokens, i)
 
         self.emit('JUMP', end_label, 'NONE', 'NONE')
         self.emit('LABEL', false_label, 'NONE', 'NONE')
 
-        # Parte do ELSE IF
+        # ELSE (sempre tratar aqui, fora do if/else do THEN)
         if i < len(tokens) and tokens[i].token_type == 'ELSE':
             i += 1
-            if i < len(tokens) and tokens[i].token_type == 'IF':
-                return self._handle_if(tokens, i, end_label)
-
-            # Parte do ELSE normal
             if tokens[i].token_type == 'BEGIN':
                 i += 1
                 while tokens[i].token_type != 'END':
-                    i = self._handle_command(tokens, i)
+                    if tokens[i].token_type == 'IF':
+                        i = self._handle_if(tokens, i)
+                    else:
+                        i = self._handle_command(tokens, i)
                 i += 1  # pula END
-                if tokens[i].token_type == 'SEMICOLON':
-                    i += 1
             else:
-                i = self._handle_command(tokens, i)
+                if tokens[i].token_type == 'IF':
+                    i = self._handle_if(tokens, i)
+                else:
+                    i = self._handle_command(tokens, i)
 
         self.emit('LABEL', end_label, 'NONE', 'NONE')
         return i
@@ -248,43 +251,45 @@ class IntermediateCodeGenerator:
             arg = tokens[i+2].value if tokens[i+1].token_type == 'LPAREN' else tokens[i+1].value
             self.emit('CALL', 'READ', arg, 'NONE')
             self.emit('CALL', 'WRITE', '\n', 'NONE')
-            return i + 3
-
+            i += 3
         elif tok.token_type in ('WRITELN', 'WRITE'):
             arg = tokens[i+2].value if tokens[i+1].token_type == 'LPAREN' else tokens[i+1].value
             self.emit('CALL', 'WRITE', arg, 'NONE')
             if tok.token_type == 'WRITELN':
                 self.emit('CALL', 'WRITE', '\n', 'NONE')
-            return i + 3
-
+            i += 3
         elif tok.token_type == 'IDENTIFIER' and tokens[i+1].token_type == 'ASSIGN':
             var_name = tok.value
             i += 2
 
             # Boolean expressions: NOT x; a AND b; m OR n
             if tokens[i].token_type == 'NOT' or \
-               (i+2 < len(tokens) and tokens[i+1].token_type in ('AND', 'OR')):
+            (i+2 < len(tokens) and tokens[i+1].token_type in ('AND', 'OR')):
                 temp, i = self._handle_boolean_expression(tokens, i)
                 self.emit('ATT', var_name, temp, 'NONE')
-                return i
-
-            # Arithmetic assignment
-            left = tokens[i].value
-            i += 1
-            if i < len(tokens) and tokens[i].token_type in ('ADD', 'SUB', 'MUL', 'DIV'):
-                op = tokens[i].token_type
-                i += 1
-                right = tokens[i].value
-                temp = self.new_temp()
-                self.emit(op, left, right, temp)
-                self.emit('ATT', var_name, temp, 'NONE')
-                return i + 1
             else:
-                self.emit('ATT', var_name, left, 'NONE')
-                return i
-
+                left = tokens[i].value
+                i += 1
+                if i < len(tokens) and tokens[i].token_type in ('ADD', 'SUB', 'MUL', 'DIV'):
+                    op = tokens[i].token_type
+                    i += 1
+                    right = tokens[i].value
+                    temp = self.new_temp()
+                    self.emit(op, left, right, temp)
+                    self.emit('ATT', var_name, temp, 'NONE')
+                    i += 1
+                else:
+                    self.emit('ATT', var_name, left, 'NONE')
         else:
-            return i + 1
+            i += 1
+
+        # Sempre avance até o SEMICOLON
+        while i < len(tokens) and tokens[i].token_type != 'SEMICOLON':
+            i += 1
+        if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
+            i += 1
+
+        return i
 
     def _handle_statement(self, tokens: List[Lexeme], i: int) -> int:
         tok = tokens[i]

@@ -1,4 +1,4 @@
-program exemplo ;
+program exemplo;
 
 var
   x, y: integer;
@@ -10,8 +10,10 @@ begin
   nome := 'grupo4';
 
   if x < y then
-    writeln(nome);
+    if y > 15 then
+      writeln(nome);
+    else
+      writeln('Y menor ou igual a 15');
   else
     writeln('Outro nome');
-
 end.
