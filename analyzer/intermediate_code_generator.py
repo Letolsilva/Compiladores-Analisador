@@ -35,19 +35,64 @@ class IntermediateCodeGenerator:
             else:
                 i += 1
 
+    def _handle_boolean_expression(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
+        """
+        Trata expressões booleanas e operadores relacionais em cascata.
+        Retorna (temp_name, nova_posição).
+        """
+        temp_stack = [] 
+        op_stack = []  
+
+        while i < len(tokens):
+            tok = tokens[i]
+
+            if tok.token_type in {'NOT'}:
+                op1, new_pos = self._handle_boolean_expression(tokens, i + 1)
+                temp = self.new_temp()
+                self.emit('NOT', temp, op1, 'NONE')
+                temp_stack.append(temp)
+                i = new_pos
+            elif tok.token_type in {'AND', 'OR'}:
+                op_stack.append(tok.token_type)
+                i += 1
+            elif tok.token_type in {'LT', 'LTE', 'GT', 'GTE', 'EQ', 'NEQ'}:
+                left = tokens[i - 1].value
+                right = tokens[i + 1].value
+                temp = self.new_temp()
+                self.emit(tok.token_type, temp, left, right)
+                temp_stack.append(temp)
+                i += 2
+            else:
+                temp_stack.append(tok.value)
+                i += 1
+
+            if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
+                break
+
+        while op_stack:
+            op = op_stack.pop(0)
+            left = temp_stack.pop(0)
+            right = temp_stack.pop(0)
+            temp = self.new_temp()
+            self.emit(op, temp, left, right)
+            temp_stack.insert(0, temp)
+
+        return temp_stack[0], i
+
     def _handle_assignment(self, tokens: List[Lexeme], i: int) -> int:
         # Parse: <id> := <expr>;
         var_name = tokens[i].value
-        i += 2  # skip IDENTIFIER and ASSIGN
+        i += 2 
 
-        # Collect expression tokens until semicolon
         expr_tokens = []
         while i < len(tokens) and tokens[i].token_type != 'SEMICOLON':
             expr_tokens.append(tokens[i])
             i += 1
 
-        # Evaluate expression left-to-right for binary ops
-        if expr_tokens:
+        if any(token.token_type in {'NOT','AND','OR','LT', 'LTE', 'GT', 'GTE', 'EQ', 'NEQ'} for token in expr_tokens):
+            temp, _ = self._handle_boolean_expression(expr_tokens, 0)
+            self.emit('ATT', var_name, temp, 'NONE')
+        elif any(token.token_type in {'ADD', 'SUB', 'MUL', 'DIV'} for token in expr_tokens):
             current = expr_tokens[0].value
             j = 1
             while j < len(expr_tokens):
@@ -57,15 +102,15 @@ class IntermediateCodeGenerator:
                 self.emit(op_tok.token_type, temp, current, right)
                 current = temp
                 j += 2
-            # Final assignment
-            self.emit('ATT', var_name, current, 'NONE')
+                self.emit('ATT', var_name, current, 'NONE')
+        else:
+            self.emit('ATT', var_name, expr_tokens[0].value, 'NONE')
 
-        # Skip the semicolon
+        
         return i + 1
 
     # def _handle_if(self, tokens: List[Lexeme], i: int, end_label: str) -> int:
     def _handle_if(self, tokens: List[Lexeme], i: int, end_label: str = None) -> int:
-
         left = tokens[i + 1].value
         op = tokens[i + 2].token_type
         right = tokens[i + 3].value
@@ -226,27 +271,6 @@ class IntermediateCodeGenerator:
         self.emit('LABEL', end_label, 'NONE', 'NONE')
 
         return i
-    
-    def _handle_boolean_expression(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
-        """
-        Trata expressões booleanas com NOT, AND, OR.
-        Retorna (temp_name, nova_posição).
-        """
-        if tokens[i].token_type == 'NOT':
-            op1 = tokens[i + 1].value
-            temp = self.new_temp()
-            self.emit('NOT', temp, op1, 'NONE')
-            return temp, i + 2
-        else:
-            op1 = tokens[i].value
-            op = tokens[i + 1].token_type
-            op2 = tokens[i + 2].value
-            temp = self.new_temp()
-            if op in ('AND', 'OR'):
-                self.emit(op, temp, op1, op2)
-                return temp, i + 3
-            # não era boolean expressão
-            return op1, i + 1
 
     def _handle_command(self, tokens: List[Lexeme], i: int) -> int:
         tok = tokens[i]
@@ -263,35 +287,7 @@ class IntermediateCodeGenerator:
                 self.emit('CALL', 'WRITE', '\n', 'NONE')
             i += 3
         elif tok.token_type == 'IDENTIFIER' and tokens[i+1].token_type == 'ASSIGN':
-            var_name = tok.value
-            i += 2
-
-            # Boolean expressions: NOT x; a AND b; m OR n
-            if tokens[i].token_type == 'NOT' or \
-            (i+2 < len(tokens) and tokens[i+1].token_type in ('AND', 'OR')):
-                temp, i = self._handle_boolean_expression(tokens, i)
-                self.emit('ATT', var_name, temp, 'NONE')
-            else:
-                left = tokens[i].value
-                i += 1
-                if i < len(tokens) and tokens[i].token_type in ('ADD', 'SUB', 'MUL', 'DIV'):
-                    op = tokens[i].token_type
-                    i += 1
-                    right = tokens[i].value
-                    temp = self.new_temp()
-                    self.emit(op, left, right, temp)
-                    self.emit('ATT', var_name, temp, 'NONE')
-                    i += 1
-                else:
-                    self.emit('ATT', var_name, left, 'NONE')
-        else:
-            i += 1
-
-        # Sempre avance até o SEMICOLON
-        while i < len(tokens) and tokens[i].token_type != 'SEMICOLON':
-            i += 1
-        if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
-            i += 1
+            i=self._handle_assignment(tokens,i)
 
         return i
 
