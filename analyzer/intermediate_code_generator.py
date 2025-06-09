@@ -125,6 +125,10 @@ class IntermediateCodeGenerator:
     def handle_loop_execution(self, tokens: List[Lexeme], i: int, start_label: str, end_label: str, _isIncreasing = False, var_name = None) -> int:
         if tokens[i].token_type in {'BREAK', 'CONTINUE'}:
             i = self.handle_loop_interruption(tokens, i, start_label, end_label, _isIncreasing, var_name)
+        elif tokens[i].token_type == 'WHILE':
+            i = self._handle_while(tokens, i)
+        elif tokens[i].token_type == 'FOR':
+            i = self._handle_for(tokens, i)
         else:
             i = self._handle_command(tokens, i)
         return i
