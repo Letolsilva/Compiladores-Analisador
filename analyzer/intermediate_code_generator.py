@@ -6,6 +6,7 @@ class IntermediateCodeGenerator:
         self.instructions: List[Tuple[str, str, str, str]] = []
         self.temp_count = 0
         self.label_count = 0
+        self.dict: dict = {}
 
     def new_temp(self) -> str:
         temp = f"T{self.temp_count+1}"
@@ -19,6 +20,7 @@ class IntermediateCodeGenerator:
 
     def emit(self, op: str, arg1: str, arg2: str, result: str):
         self.instructions.append((op, arg1, arg2, result))
+        self.dict[op] = self.dict.get(op, 0) + 1
 
     def generate_from_tokens(self, tokens: List[Lexeme]):
         i = 0
@@ -34,50 +36,66 @@ class IntermediateCodeGenerator:
                 i = self._handle_for(tokens, i)
             else:
                 i += 1
-
+    
     def _handle_boolean_expression(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
-        """
-        Trata expressões booleanas e operadores relacionais em cascata.
-        Retorna (temp_name, nova_posição).
-        """
-        temp_stack = [] 
-        op_stack = []  
+        return self._parse_or(tokens, i)
 
-        while i < len(tokens):
-            tok = tokens[i]
+    # OR é o nível mais baixo (menor precedência)
+    def _parse_or(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
+        left_temp, i = self._parse_and(tokens, i)
+        while i < len(tokens) and tokens[i].token_type == 'OR':
+            i += 1
+            right_temp, i = self._parse_and(tokens, i)
+            res = self.new_temp()
+            self.emit('OR', res, left_temp, right_temp)
+            left_temp = res
+        return left_temp, i
 
-            if tok.token_type in {'NOT'}:
-                op1, new_pos = self._handle_boolean_expression(tokens, i + 1)
-                temp = self.new_temp()
-                self.emit('NOT', temp, op1, 'NONE')
-                temp_stack.append(temp)
-                i = new_pos
-            elif tok.token_type in {'AND', 'OR'}:
-                op_stack.append(tok.token_type)
-                i += 1
-            elif tok.token_type in {'LT', 'LTE', 'GT', 'GTE', 'EQ', 'NEQ'}:
-                left = tokens[i - 1].value
-                right = tokens[i + 1].value
-                temp = self.new_temp()
-                self.emit(tok.token_type, temp, left, right)
-                temp_stack.append(temp)
-                i += 2
-            else:
-                temp_stack.append(tok.value)
-                i += 1
+    # AND acima de OR
+    def _parse_and(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
+        left_temp, i = self._parse_not(tokens, i)
+        while i < len(tokens) and tokens[i].token_type == 'AND':
+            i += 1
+            right_temp, i = self._parse_not(tokens, i)
+            res = self.new_temp()
+            self.emit('AND', res, left_temp, right_temp)
+            left_temp = res
+        return left_temp, i
 
-            if i < len(tokens) and tokens[i].token_type == 'SEMICOLON':
-                break
+    # NOT tem precedência máxima
+        # NOT tem precedência máxima
+    def _parse_not(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
+        not_count = 0
+        # Conta quantos NOTs seguidos existem
+        while i < len(tokens) and tokens[i].token_type == 'NOT':
+            not_count += 1
+            i += 1
+        operand_temp, i = self._parse_primary(tokens, i)
+        # Aplica os NOTs na ordem correta
+        for _ in range(not_count):
+            res = self.new_temp()
+            self.emit('NOT', res, operand_temp, 'NONE')
+            operand_temp = res
+        return operand_temp, i
 
-        while op_stack:
-            op = op_stack.pop(0)
-            left = temp_stack.pop(0)
-            right = temp_stack.pop(0)
-            temp = self.new_temp()
-            self.emit(op, temp, left, right)
-            temp_stack.insert(0, temp)
+    # Primários: parênteses ou comparação relacional
+    def _parse_primary(self, tokens: List[Lexeme], i: int) -> Tuple[str, int]:
+        # subexpressão em parênteses
+        if tokens[i].token_type == 'LPAREN':
+            i += 1
+            temp, i = self._handle_boolean_expression(tokens, i)
+            if tokens[i].token_type != 'RPAREN':
+                raise Exception(f"Expected RPAREN, got {tokens[i].token_type}")
+            return temp, i + 1
 
-        return temp_stack[0], i
+        # relacional simples: x < y, 2 >= 3, etc.
+        left  = tokens[i].value
+        op    = tokens[i+1].token_type
+        right = tokens[i+2].value
+        res = self.new_temp()
+        self.emit(op, res, left, right)
+        return res, i + 3
+
 
     def _handle_assignment(self, tokens: List[Lexeme], i: int) -> int:
         # Parse: <id> := <expr>;
@@ -109,45 +127,53 @@ class IntermediateCodeGenerator:
         
         return i + 1
 
-    # def _handle_if(self, tokens: List[Lexeme], i: int, end_label: str) -> int:
     def _handle_if(self, tokens: List[Lexeme], i: int, end_label: str = None) -> int:
-        left = tokens[i + 1].value
-        op = tokens[i + 2].token_type
-        right = tokens[i + 3].value
-        temp = self.new_temp()
-        self.emit(op, left, right, temp)
+        """
+        IF <cond> THEN ... [ELSE ...]
+        usando _handle_boolean_expression para toda a condição.
+        """
+        # pula o 'IF'
+        i += 1
 
-        true_label = self.new_label()
+        # trata condição inteira e recebe o temp final
+        cond_temp, i = self._handle_boolean_expression(tokens, i)
+
+        # agora deve estar em 'THEN'
+        if tokens[i].token_type == 'THEN':
+            i += 1
+
+        # gera labels
+        true_label  = self.new_label()
         false_label = self.new_label()
         if not end_label:
             end_label = self.new_label()
 
-        self.emit('IF', temp, true_label, false_label)
+        # salto condicional
+        self.emit('IF', cond_temp, true_label, false_label)
 
-        # THEN
+        # bloco THEN
         self.emit('LABEL', true_label, 'NONE', 'NONE')
-        i += 4  # pula IF condicional
-        if tokens[i].token_type == 'THEN':
-            i += 1
-
         if tokens[i].token_type == 'BEGIN':
+            # consome bloco BEGIN...END;
             i += 1
             while tokens[i].token_type != 'END':
                 if tokens[i].token_type == 'IF':
                     i = self._handle_if(tokens, i)
                 else:
                     i = self._handle_command(tokens, i)
-            i += 1  # pula END
+            i += 1  # pula 'END'
         else:
+            # comando único
             if tokens[i].token_type == 'IF':
                 i = self._handle_if(tokens, i)
             else:
                 i = self._handle_command(tokens, i)
 
+        # pula para fim do IF
         self.emit('JUMP', end_label, 'NONE', 'NONE')
         self.emit('LABEL', false_label, 'NONE', 'NONE')
 
-        # ELSE (sempre tratar aqui, fora do if/else do THEN)
+        # ELSE (se existir)
         if i < len(tokens) and tokens[i].token_type == 'ELSE':
             i += 1
             if tokens[i].token_type == 'BEGIN':
@@ -157,13 +183,14 @@ class IntermediateCodeGenerator:
                         i = self._handle_if(tokens, i)
                     else:
                         i = self._handle_command(tokens, i)
-                i += 1  # pula END
+                i += 1  # pula 'END'
             else:
                 if tokens[i].token_type == 'IF':
                     i = self._handle_if(tokens, i)
                 else:
                     i = self._handle_command(tokens, i)
 
+        # marca fim do IF
         self.emit('LABEL', end_label, 'NONE', 'NONE')
         return i
         
@@ -237,9 +264,9 @@ class IntermediateCodeGenerator:
         # Verifica a condição do loop
         temp = self.new_temp()
         if isIncreasing:
-            self.emit('LEQ', var_name, end_value, temp)
+            self.emit('LEQ', temp, var_name, end_value)
         else:
-            self.emit('GEQ', var_name, end_value, temp)
+            self.emit('GEQ', temp, var_name, end_value)
 
         self.emit('IF', temp, body_label, end_label)
 
