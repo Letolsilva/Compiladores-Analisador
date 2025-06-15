@@ -4,6 +4,7 @@ from analyzer.lexicalAnalysis import LexicalAnalysis
 from analyzer.SyntacticAnalysis import SyntacticAnalysis
 from analyzer.intermediate_code_generator import IntermediateCodeGenerator
 from analyzer.semantic_analysis import SemanticAnalysis, SemanticError
+from analyzer.execute import IntermediateCodeExecutor
 
 
 def print_ast(node, indent=0):
@@ -52,7 +53,7 @@ if __name__ == "__main__":
         caminho_arquivo = sys.argv[1]
         processar_arquivo(caminho_arquivo)
         path = sys.argv[1]
-        code = open(path, encoding="latin-1").read()
+        code = open(path, encoding="utf-8").read()
         lex = LexicalAnalysis(code)
         tokens = lex.analyze()
         for t in tokens:
@@ -77,3 +78,9 @@ if __name__ == "__main__":
             gen.print_instructions()
         except SyntaxError as e:
             print(f"Erro sintático: {e}")
+
+        print("\n\texecute\n\n")
+        executor = IntermediateCodeExecutor(gen.instructions)
+        executor.run()
+
+

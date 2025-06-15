@@ -335,12 +335,22 @@ class LexicalAnalysis:
             identifier += self.source_code[self.current_index]
             self.current_index += 1
 
+        # if identifier in TokenType.RESERVED_WORDS:
+        #     self._add_token(TokenType.RESERVED_WORDS[identifier], identifier)
+        # elif identifier in TokenType.LOGICAL_OPERATORS:  # and,or ou not
+        #     self._add_token(TokenType.LOGICAL_OPERATORS[identifier], identifier)
+        # else:
+        #     self._add_token("IDENTIFIER", identifier)
+
         if identifier in TokenType.RESERVED_WORDS:
             self._add_token(TokenType.RESERVED_WORDS[identifier], identifier)
-        elif identifier in TokenType.LOGICAL_OPERATORS:  # and,or ou not
+        elif identifier in TokenType.LOGICAL_OPERATORS:
             self._add_token(TokenType.LOGICAL_OPERATORS[identifier], identifier)
+        elif identifier in TokenType.ARITHMETIC_OPERATORS:
+            self._add_token(TokenType.ARITHMETIC_OPERATORS[identifier], identifier)
         else:
             self._add_token("IDENTIFIER", identifier)
+
 
     def _add_token(self, token_type, value):
         lexeme = Lexeme(token_type, value, self.current_line, self.current_column)
@@ -410,8 +420,9 @@ class LexicalAnalysis:
         ):
             self.current_index += 1
             self.current_column += 1
-            interpreted_string = string_value.encode("utf-8").decode("unicode_escape")
-            self._add_token("STRING", interpreted_string)
+            # interpreted_string = string_value.encode("utf-8").decode("unicode_escape")
+            # self._add_token("STRING", interpreted_string)
+            self._add_token("STRING", string_value)
             self.current_column += 1
         else:
             raise ValueError(
