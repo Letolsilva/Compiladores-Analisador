@@ -4,6 +4,7 @@ class IntermediateCodeExecutor:
         self.variables = {}  # Dicionário de variáveis (x, y, T1, T2, etc)
         self.labels = self._map_labels()  # Mapa: label -> índice da instrução
         self.pc = 0  # Program Counter (posição atual de execução)
+        self.output = "" # Para armazenar a saida e fazer testes depois
 
     def _map_labels(self):
         labels = {}
@@ -54,6 +55,7 @@ class IntermediateCodeExecutor:
                     if isinstance(val, str):
                         val = val.replace("\\n", "\n")
                     print(val, end='')
+                    self.output += str(val)
                 elif arg1 == "READ":
                     user_input = input()
                     try:
@@ -71,6 +73,7 @@ class IntermediateCodeExecutor:
                 raise Exception(f"Instrução não reconhecida: {op}")
 
             self.pc += 1
+        return self.output
 
     
     def _get_value(self, arg):

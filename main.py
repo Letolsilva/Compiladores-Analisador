@@ -6,7 +6,6 @@ from analyzer.intermediate_code_generator import IntermediateCodeGenerator
 from analyzer.semantic_analysis import SemanticAnalysis, SemanticError
 from analyzer.execute import IntermediateCodeExecutor
 
-
 def print_ast(node, indent=0):
     prefix = "  " * indent
     if node is None:
@@ -34,16 +33,61 @@ def print_ast(node, indent=0):
             print(repr(value))
     print(f"{prefix})")
 
+def executar_codigo(caminho_arquivo, should_print_helpers = False):
+    source_code = processar_arquivo(caminho_arquivo, should_print_helpers)
 
-def processar_arquivo(caminho_arquivo):
+    lex = LexicalAnalysis(source_code)
+    tokens = lex.analyze()
+
+    if should_print_helpers:
+        for t in tokens:
+            print(f"{t.token_type}({t.value})", end=" ")
+        print()
+
+    try:
+        parser = SyntacticAnalysis(tokens)
+        ast = parser.parse()
+
+        if should_print_helpers:
+            print("Parsing successful!")
+
+            print("\nAST:")
+            print_ast(ast)
+
+        try:
+            semantic = SemanticAnalysis()
+            semantic.analyze(ast)
+
+            if should_print_helpers:
+                print("Semantic analysis successful!")
+
+            gen = IntermediateCodeGenerator()
+            gen.generate_from_ast(ast)
+
+            if should_print_helpers:
+                gen.print_instructions()
+                print("\n\texecute\n\n")
+
+            executor = IntermediateCodeExecutor(gen.instructions)
+            return executor.run()
+            
+        except SemanticError as se:
+            print(f"Erro semântico: {se}")
+    except SyntaxError as e:
+        print(f"Erro sintático: {e}")
+
+def processar_arquivo(caminho_arquivo, should_print_helpers):
     if not os.path.exists(caminho_arquivo):
         print(f"Arquivo '{caminho_arquivo}' não encontrado.")
         return
+    
+    if should_print_helpers:
+        print(f"\nArquivo: {os.path.basename(caminho_arquivo)}\n")
 
-    print(f"\nArquivo: {os.path.basename(caminho_arquivo)}\n")
-
-    with open(caminho_arquivo, "r", encoding="latin-1") as file:
+    with open(caminho_arquivo, "r", encoding="utf-8") as file:
         source_code = file.read()
+
+    return source_code
 
 
 if __name__ == "__main__":
@@ -51,34 +95,4 @@ if __name__ == "__main__":
         print("Uso: python main.py <caminho-do-arquivo>")
     else:
         caminho_arquivo = sys.argv[1]
-        processar_arquivo(caminho_arquivo)
-        path = sys.argv[1]
-        code = open(path, encoding="utf-8").read()
-        lex = LexicalAnalysis(code)
-        tokens = lex.analyze()
-        for t in tokens:
-            print(f"{t.token_type}({t.value})", end=" ")
-        print()
-        try:
-            parser = SyntacticAnalysis(tokens)
-            ast = parser.parse()
-            print("Parsing successful!")
-
-            print("\nAST:")
-            print_ast(ast)
-
-            try:
-                semantic = SemanticAnalysis()
-                semantic.analyze(ast)
-                print("Semantic analysis successful!")
-            except SemanticError as se:
-                print(f"Erro semântico: {se}")
-            gen = IntermediateCodeGenerator()
-            gen.generate_from_ast(ast)
-            gen.print_instructions()
-        except SyntaxError as e:
-            print(f"Erro sintático: {e}")
-
-        print("\n\texecute\n\n")
-        executor = IntermediateCodeExecutor(gen.instructions)
-        executor.run()
+        executar_codigo(caminho_arquivo)

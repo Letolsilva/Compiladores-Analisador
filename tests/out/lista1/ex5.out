@@ -1,0 +1,6 @@
+=== TESTE DE DIVISÕES ===
+x = 10
+y = 3
+x / y = 3.3333333333333335
+x div y = 3
+x mod y = 1
