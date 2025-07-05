@@ -1,6 +1,6 @@
 program exs23;
 
-uses crt;
+
 
 var horas, grat : integer;
     peri,cat: char;
@@ -10,34 +10,34 @@ begin;
 
  {depois de se declarar as variaveis, se apresenta o programa ao usuario.}
 
- clrscr;
+
  writeln ('caro usuario te calculara e te mostrara, o valor da hora em funcao do periodo trabalhado, o valor do salario bruto,');
  writeln ('o valor do imposto, sua gratificacao, o auxilio alimentacao, o salario liquido e sua classificacao.');
  write ('para prosseguir tecle enter.');
- readkey;
 
- clrscr;
+
+
  writeln ('por favor digite o valor do salario minimo.');
  readln (sal_min);
 
- clrscr;
+
  writeln ('agora digite a quantidade de horas trabalhadas.');
  readln (horas);
 
- clrscr;
+
  writeln ('agora digite o periodo que voce trabalha sendo M=matutino, V=vespertino, N=noturno. Lembre-se de colocar letra maiuscula.');
  readln (peri);
 
- clrscr;
+
  writeln ('agora digite sua funcao O=operario, G=gerente. Lembre-se de colocar letra maiuscula.');
  readln (cat);
 
- {entÆo se le as variaveis do salario minimo, da quantidade de horas, do periodo em que o usuario trabalha e de sua
-  fun‡Æo, para que se possa realizar os calculos.}
+ {entï¿½o se le as variaveis do salario minimo, da quantidade de horas, do periodo em que o usuario trabalha e de sua
+  funï¿½ï¿½o, para que se possa realizar os calculos.}
 
- clrscr;
 
- //a primeira cadeia de ifs ‚ para definir o valor de cada hora trabalhada.
+
+ //a primeira cadeia de ifs ï¿½ para definir o valor de cada hora trabalhada.
 
  if (peri='M') then
     begin
@@ -56,7 +56,7 @@ begin;
 
  sal_bruto:= val_hora*horas;
 
- //entÆo se abre uma estrutura de case com uma cadeia de ifs interna para se calcular o valor do imposto.
+ //entï¿½o se abre uma estrutura de case com uma cadeia de ifs interna para se calcular o valor do imposto.
 
  case cat of
 
@@ -83,7 +83,7 @@ begin;
         end;
  end;
 
- //entÆo se abre outra cadeia de ifs para se definir de quanto ser  a gratifica‡Æo do usuario.
+ //entï¿½o se abre outra cadeia de ifs para se definir de quanto serï¿½ a gratificaï¿½ï¿½o do usuario.
 
  if (peri='N') and (horas > 80) then
      begin
@@ -94,7 +94,7 @@ begin;
            grat:= 30;
            end;
 
- //entÆo outra cadeia de ifs ‚ aberta para definir de quanto ser  o auxilio alimenta‡Æo do usuario.
+ //entï¿½o outra cadeia de ifs ï¿½ aberta para definir de quanto serï¿½ o auxilio alimentaï¿½ï¿½o do usuario.
 
  if (cat = 'O') or (val_hora <= 25) then
     begin
@@ -109,43 +109,43 @@ begin;
 
  sal_liq:= sal_bruto - imp + grat + auxilio;
 
- //entÆo ja na ultima cadeia de ifs se apresenta ao usuario todos os resultados juntamente com sua classifica‡Æo.
+ //entï¿½o ja na ultima cadeia de ifs se apresenta ao usuario todos os resultados juntamente com sua classificaï¿½ï¿½o.
 
  if (sal_liq > 600) then
     begin
-    writeln ('o valor de cada hora trabalhada e de ', val_hora:4:2 , ' .');
-    writeln ('o valor do salario bruto e de ', sal_bruto:4:2 , ' .');
-    writeln ('o valor de imposto pago e de ', imp:4:2 , ' .');
+    writeln ('o valor de cada hora trabalhada e de ', val_hora , ' .');
+    writeln ('o valor do salario bruto e de ', sal_bruto , ' .');
+    writeln ('o valor de imposto pago e de ', imp , ' .');
     writeln ('a gratificacao recebida e de ', grat , ' .');
-    writeln ('o valor do auxilio alimentacao e de ', auxilio:4:2 , ' .');
-    writeln ('o salario liquido e de ', sal_liq:4:2 , ' .');
+    writeln ('o valor do auxilio alimentacao e de ', auxilio , ' .');
+    writeln ('o salario liquido e de ', sal_liq , ' .');
     writeln ('e sua classificacao e BEM REMUNERADO.');
     end
 
     else if (sal_liq <= 600) and (sal_liq >= 350) then
             begin
-            writeln ('o valor de cada hora trabalhada e de ', val_hora:4:2 , ' .');
-            writeln ('o valor do salario bruto e de ', sal_bruto:4:2 , ' .');
-            writeln ('o valor de imposto pago e de ', imp:4:2 , ' .');
+            writeln ('o valor de cada hora trabalhada e de ', val_hora , ' .');
+            writeln ('o valor do salario bruto e de ', sal_bruto , ' .');
+            writeln ('o valor de imposto pago e de ', imp , ' .');
             writeln ('a gratificacao recebida e de ', grat , ' .');
-            writeln ('o valor do auxilio alimentacao e de ', auxilio:4:2 , ' .');
-            writeln ('o salario liquido e de ', sal_liq:4:2 , ' .');
+            writeln ('o valor do auxilio alimentacao e de ', auxilio , ' .');
+            writeln ('o salario liquido e de ', sal_liq , ' .');
             writeln ('e sua classificacao e NORMAL.');
             end
 
             else if (sal_liq < 350) then
                     begin
-                    writeln ('o valor de cada hora trabalhada e de ', val_hora:4:2 , ' .');
-                    writeln ('o valor do salario bruto e de ', sal_bruto:4:2 , ' .');
-                    writeln ('o valor de imposto pago e de ', imp:4:2 , ' .');
+                    writeln ('o valor de cada hora trabalhada e de ', val_hora , ' .');
+                    writeln ('o valor do salario bruto e de ', sal_bruto , ' .');
+                    writeln ('o valor de imposto pago e de ', imp , ' .');
                     writeln ('a gratificacao recebida e de ', grat , ' .');
-                    writeln ('o valor do auxilio alimentacao e de ', auxilio:4:2 , ' .');
-                    writeln ('o salario liquido e de ', sal_liq:4:2 , ' .');
+                    writeln ('o valor do auxilio alimentacao e de ', auxilio , ' .');
+                    writeln ('o salario liquido e de ', sal_liq , ' .');
                     writeln ('e sua classificacao e MAL REMUNERADO.');
                     end;
 
  writeln (' ');
  write ('para encerrar o programa precione qualquer tecla.');
- readkey;
+
 
 end.

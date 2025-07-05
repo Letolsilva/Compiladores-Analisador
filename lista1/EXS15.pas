@@ -1,6 +1,6 @@
 program exs15;
 
-uses crt;
+
 
 var sal, hora_t, hora_e, dep: integer;
     sal_bru, sal_liq, val_ht, val_he, imp, grat : real;
@@ -9,27 +9,27 @@ begin;
 
  //depois de se declarar as variaveis se apresenta o programa ao usuario.
 
- clrscr;
+
  writeln ('caro usuario este programa calculara seu salario de acordo com o valor do salario minimo,');
  writeln ('da quantidade de horas trabalhadas e extras, e dos dependentes.');
  write ('para prosseguir tecle enter.');
- readkey;
 
- //entÆo se le os valores de salario minimo, da quantidade de horas trabalhadas e horas extras, e a quantidade de dependentes.
 
- clrscr;
+ //entï¿½o se le os valores de salario minimo, da quantidade de horas trabalhadas e horas extras, e a quantidade de dependentes.
+
+
  writeln ('por favor digite o valor do salario minimo.');
  readln (sal);
 
- clrscr;
+
  writeln ('agora digite a quantidade de horas trabalhadas.');
  readln (hora_t);
 
- clrscr;
+
  writeln ('agora digite a quantidade de dependentes.');
  readln (dep);
 
- clrscr;
+
  writeln ('agora digite a quantidade de horas extras.');
  readln (hora_e);
 
@@ -39,14 +39,14 @@ begin;
  val_ht:= sal/5;
  val_he:= val_ht*1.5;
 
- // o salario bruto ‚ calculado pela quantidade de horas trabalhadas * o seu valor, pela quantidade de horas extras * o seu valor
+ // o salario bruto ï¿½ calculado pela quantidade de horas trabalhadas * o seu valor, pela quantidade de horas extras * o seu valor
  // e pela quantidade de dependentes * 32.
 
  sal_bru:=   (val_ht * hora_t)+(dep * 32)+(val_he * hora_e);
 
 
- //para descobrir o imposto ‚ nescessario uma cadeia de ifs
- //se o salario for maior que 500 entao o imposto sera de 20%, se estiver entre 500 e 200 sera de 10%, caso menor que 200 nÆo ha imposto.
+ //para descobrir o imposto ï¿½ nescessario uma cadeia de ifs
+ //se o salario for maior que 500 entao o imposto sera de 20%, se estiver entre 500 e 200 sera de 10%, caso menor que 200 nï¿½o ha imposto.
 
  if (sal_bru > 500) then
     begin
@@ -64,13 +64,13 @@ begin;
                     end;
 
 
- //o salario liquido ‚ calculado pela subtra‡Æo do imposto sobre o salario bruto.
+ //o salario liquido ï¿½ calculado pela subtraï¿½ï¿½o do imposto sobre o salario bruto.
 
  sal_liq:=  sal_bru - imp;
 
- //aqui ja se calcula a bonifica‡Æo e apresenta ao usuario o salario recebido dele.
- //caso o salario seja maior que 350 a bonifica‡Æo ‚ de 50 e basta ser somada ao salario liquido.
- //caso seja menor ou igual a 350 a bonifica‡Æo ‚ de 100 e da mesma maneira so ‚ nescessario somar ao salario liquido.
+ //aqui ja se calcula a bonificaï¿½ï¿½o e apresenta ao usuario o salario recebido dele.
+ //caso o salario seja maior que 350 a bonificaï¿½ï¿½o ï¿½ de 50 e basta ser somada ao salario liquido.
+ //caso seja menor ou igual a 350 a bonificaï¿½ï¿½o ï¿½ de 100 e da mesma maneira so ï¿½ nescessario somar ao salario liquido.
 
  if (sal_liq > 350) then
     begin
@@ -84,6 +84,6 @@ begin;
 
  writeln (' ');
  write ('para encerrar o programa precione qualquer tecla.');
- readkey;
+
 
 end.

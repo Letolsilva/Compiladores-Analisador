@@ -6,7 +6,7 @@ a:=1.321
 
 program // {qasd exs3};
 
-uses crt;
+
 
 
 begin;

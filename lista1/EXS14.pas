@@ -1,6 +1,6 @@
 program exs14;
 
-uses crt;
+
 
 var sal,bon,aux,novo_sal: real;
 
@@ -8,18 +8,18 @@ begin;
 
  //depois de se declarar as variaveis se da um resumo do programa para o usuario
 
- clrscr;
+
  writeln ('caro usuario este programa lhe mostrara seu novo salario com bonificacao e auxilio escola.');
  write ('para prosseguir tecle enter.');
- readkey;
 
- // entao se le o salario dele para se fazer os calculos de bonifica‡Æo e auxilio escola.
 
- clrscr;
+ // entao se le o salario dele para se fazer os calculos de bonificaï¿½ï¿½o e auxilio escola.
+
+
  writeln ('por favor digite o seu salario.');
  readln (sal);
 
- // o calculo da bonifica‡Æo ‚ feita em uma cadeia de ifs onde a condi‡Æo atendida sera somada ao salario inicial
+ // o calculo da bonificaï¿½ï¿½o ï¿½ feita em uma cadeia de ifs onde a condiï¿½ï¿½o atendida sera somada ao salario inicial
  // juntamente com o auxilio escola.
 
  if (sal > 1200) then
@@ -38,7 +38,7 @@ begin;
                  end;
 
 
-  //como o auxilio escola so tem duas condi‡äes se a primeira nÆo for atendida automaticamente sera calculada a segunda
+  //como o auxilio escola so tem duas condiï¿½ï¿½es se a primeira nï¿½o for atendida automaticamente sera calculada a segunda
 
  if (sal > 600) then
     begin
@@ -50,14 +50,14 @@ begin;
         aux:= 150;
         end;
 
- //entÆo a unica coisa restante ‚ calcular o novo salario e o apresentar ao usuario.
+ //entï¿½o a unica coisa restante ï¿½ calcular o novo salario e o apresentar ao usuario.
 
  novo_sal:= sal+bon+aux;
 
- clrscr;
- writeln ('caro usuario seu novo salario e ', novo_sal:4:2 , ' .');
+
+ writeln ('caro usuario seu novo salario e ', novo_sal , ' .');
  writeln (' ');
  write ('para encerrar o programa precione qualquer tecla.');
- readkey;
+
 
 end.

@@ -1,11 +1,12 @@
 program exemplo;
 
 var
-  x, y: integer;
+  x: real;
+  y: integer;
   nome: string;
 
 begin
-  x := 10;
+  x := 10.5;
   y := 20;
   nome := 'grupo4';
 

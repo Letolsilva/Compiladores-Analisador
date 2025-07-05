@@ -56,6 +56,8 @@ class IntermediateCodeGenerator:
         self.emit("ATT", node.identifier.name, expr_temp, "NONE")
 
     def gen_LiteralNode(self, node):
+        if isinstance(node.value, str):
+            return f'"{node.value}"'
         return str(node.value)
 
     def gen_IdentifierNode(self, node):

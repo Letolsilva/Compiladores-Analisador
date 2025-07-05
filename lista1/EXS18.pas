@@ -1,6 +1,6 @@
 program exs17;
 
-uses crt;
+
 
 var x,y,z: real;
 
@@ -8,33 +8,33 @@ begin;
 
  //depois de se declarar as variaveis se da o resumo do programa ao usuario.
 
- clrscr;
+
  writeln ('caro usuario este programa recebera tres medidas e te dira se essas medidas sao de um triangulo,');
  writeln ('equilatero, isosceles ou escaleno. ou se essas tres medidas nao formem um triangulo tambem.');
  writeln (' ');
  write ('para prosseguir precione enter.');
- readkey;
 
- //entao se le as 3 medidas do usuario para descobrir qual tipo de triangulo ‚.
 
- clrscr;
+ //entao se le as 3 medidas do usuario para descobrir qual tipo de triangulo ï¿½.
+
+
  writeln ('por favor digite a primeira medida .');
  readln (x);
 
- clrscr;
+
  writeln ('agora digite a segunda medida .');
  readln (y);
 
- clrscr;
+
  writeln ('agora digite a terceira medida .');
  readln (z);
 
- // entao se come‡a a cadeia de ifs. Note que para a cadeia central ser executada uma condi‡Æo tem que ser cumprida
- // pois se essa condi‡Æo primaria nao for cumprida a figura em questÆo nÆo ‚ um triangulo.
- // porem quando ela ja foi cumprida basta colocar condi‡äes para cada tipo de triangulo baseado em seu formato.
- // dessa forma vocˆ mostra ao usuario se a figura em questÆo ‚ algum dos tipos de triƒngulo, ou nÆo ‚ um triangulo.
+ // entao se comeï¿½a a cadeia de ifs. Note que para a cadeia central ser executada uma condiï¿½ï¿½o tem que ser cumprida
+ // pois se essa condiï¿½ï¿½o primaria nao for cumprida a figura em questï¿½o nï¿½o ï¿½ um triangulo.
+ // porem quando ela ja foi cumprida basta colocar condiï¿½ï¿½es para cada tipo de triangulo baseado em seu formato.
+ // dessa forma vocï¿½ mostra ao usuario se a figura em questï¿½o ï¿½ algum dos tipos de triï¿½ngulo, ou nï¿½o ï¿½ um triangulo.
 
- clrscr;
+
 
  if (x < y+z) and (y < x+z) and (z < x+y) then
     begin
@@ -63,6 +63,6 @@ begin;
 
  writeln (' ');
  write ('para encerrar o programa precione qualquer tecla.');
- readkey;
+
 
 end.

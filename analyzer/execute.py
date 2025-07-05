@@ -17,7 +17,6 @@ class IntermediateCodeExecutor:
         while self.pc < len(self.instructions):
             op, arg1, arg2, res = self.instructions[self.pc]
 
-            #Debug opcional: mostrar qual instrução está sendo executada
             #print(f"\n[{self.pc+1}] Executando: {op}, {arg1}, {arg2}, {res}")
 
             if op == "ATT":
@@ -52,13 +51,11 @@ class IntermediateCodeExecutor:
             elif op == "CALL":
                 if arg1 == "WRITE":
                     val = self._get_value(arg2)
-                    if val == "\\n" or val == "\n":
-                        print()
-                    else:
-                        print(val, end='')
+                    if isinstance(val, str):
+                        val = val.replace("\\n", "\n")
+                    print(val, end='')
                 elif arg1 == "READ":
                     user_input = input()
-                    # Tentar converter número, se não, guardar como string
                     try:
                         if '.' in user_input:
                             self.variables[arg2] = float(user_input)
@@ -73,17 +70,25 @@ class IntermediateCodeExecutor:
             else:
                 raise Exception(f"Instrução não reconhecida: {op}")
 
-            # Sempre incrementa o program counter se não foi um jump ou if
             self.pc += 1
 
     
     def _get_value(self, arg):
         if arg.isdigit() or (arg.startswith('-') and arg[1:].isdigit()):
             return int(arg)
+        elif (arg.startswith('"') and arg.endswith('"')) or (arg.startswith("'") and arg.endswith("'")):
+            literal = arg[1:-1]
+            try:
+                if '.' in literal:
+                    return float(literal)
+                return int(literal)
+            except ValueError:
+                return literal 
         elif arg in self.variables:
             return self.variables[arg]
         else:
-            return arg  # Strings como mensagens de PRINT
+            return arg
+
 
     def _execute_binary(self, op, val1, val2):
         if op == "ADD":
@@ -93,7 +98,11 @@ class IntermediateCodeExecutor:
         elif op == "MUL":
             return val1 * val2
         elif op == "DIV":
+            return val1 / val2 if val2 != 0 else 0.0
+        elif op == "INT_DIV":
             return val1 // val2 if val2 != 0 else 0
+        elif op == "MOD":
+            return val1 % val2 if val2 != 0 else 0
         elif op == "LT":
             return int(val1 < val2)
         elif op == "GT":
@@ -108,3 +117,4 @@ class IntermediateCodeExecutor:
             return int(bool(val1) or bool(val2))
         elif op == "EQUALS":
             return int(val1 == val2)
+

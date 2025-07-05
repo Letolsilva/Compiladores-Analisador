@@ -82,5 +82,3 @@ if __name__ == "__main__":
         print("\n\texecute\n\n")
         executor = IntermediateCodeExecutor(gen.instructions)
         executor.run()
-
-

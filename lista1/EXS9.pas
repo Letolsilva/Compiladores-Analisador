@@ -9,10 +9,10 @@ begin;
 
  //primeiro se apresenta ao usuario o que o programa ira fazer.
 
- clrscr;
+
  writeln ('caro usuario este programa lhe mostrara a data e hora atuais.');
  write ('para comecar tecle enter.');
- readkey;
+
 
  //para se adiquirir a hora e data atuais e nescessario usar dois comandos que estao em outra biblioteca
  //se usa a biblioteca 'dos' e para adquirir os valores se usa o comando getdate para adiquirir a data.
@@ -22,10 +22,10 @@ begin;
  getdate (ano, mes, dia, dia_semana);
  gettime (hora, minuto, segundo, cen_seg);
 
- clrscr;
 
- //ja que o mˆs deve ser escrito em forma extensa entao para cada numero de 1 a 12 se escreve em uma condi‡Æo
- //e a unica coisa restante ‚ mostrar para o usuario os resultados.
+
+ //ja que o mï¿½s deve ser escrito em forma extensa entao para cada numero de 1 a 12 se escreve em uma condiï¿½ï¿½o
+ //e a unica coisa restante ï¿½ mostrar para o usuario os resultados.
 
  case mes of
 
@@ -44,12 +44,12 @@ begin;
 
  end;
 
- //depois de terminar a estrutura de case se salta uma linha para certificar que o usuario nÆo fique confuso
+ //depois de terminar a estrutura de case se salta uma linha para certificar que o usuario nï¿½o fique confuso
  //e se mostra as horas para ele junto com a data composta.
 
  writeln (' ');
  writeln ('e a hora e ', hora ,':',minuto);
  writeln (' ');
- write ('para encerrar o programa precione qualquer tecla.');  readkey;
+ write ('para encerrar o programa precione qualquer tecla.'); 
 
 end.

@@ -1,6 +1,6 @@
 program exs19 ;
 
-uses crt;
+
 
 var n1,n2: real;
 
@@ -8,23 +8,23 @@ begin;
 
  //depois de se declarar as variaveis se da o resumo do programa ao usuario
 
- clrscr;
+
  writeln ('caro usuario este programa lhe mostrara sua classificacao de acordo com seu peso e altura.');
  write ('para continuar tecle enter.');
- readkey;
 
- //entÆo se le a altura e peso do usuario para mostra-lhe a sua classifica‡Æo
 
- clrscr;
+ //entï¿½o se le a altura e peso do usuario para mostra-lhe a sua classificaï¿½ï¿½o
+
+
  writeln ('por favor digite sua altura.');
  readln (n1);
 
- clrscr;
+
  writeln ('agora digite seu peso.');
  readln (n2);
 
- //entÆo se faz 3 cadeias de ifs 1 para cada condi‡Æo de altura e dentro das cadeias de alturas se coloca as condi‡äes
- //de pesos para achar a classifica‡Æo do usuario
+ //entï¿½o se faz 3 cadeias de ifs 1 para cada condiï¿½ï¿½o de altura e dentro das cadeias de alturas se coloca as condiï¿½ï¿½es
+ //de pesos para achar a classificaï¿½ï¿½o do usuario
 
  if (n1 < 1.20) then
     begin
@@ -81,10 +81,10 @@ begin;
 
     end;
 
-  //depois so resta mostrar ao usuario sua classifica‡Æo.
+  //depois so resta mostrar ao usuario sua classificaï¿½ï¿½o.
 
  writeln (' ');
  write ('para encerrar o programa precione qualquer tecla.');
- readkey;
+
 
 end.
