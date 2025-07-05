@@ -1,5 +1,4 @@
-<h1 align="center" font-size="200em"><b>📘 Compilador Pascal--: Analisador Léxico e Sintático</b></h1>
-
+<h1 align="center" font-size="200em"><b>📘 Compilador Pascal--: Analisador Léxico, Sintático e Interpretador</b></h1>
 <div align = "center" >
 
 [![requirement](https://img.shields.io/badge/IDE-Visual%20Studio%20Code-informational)](https://code.visualstudio.com/docs/?dv=linux64_deb)
@@ -7,12 +6,13 @@
 </div>
 
 ## ✒️ Descrição
-Este projeto é a implementação das etapas **1 e 2 do Trabalho Prático** da disciplina de Compiladores. Foi desenvolvido as etapas de **análise léxica** e **análise sintática** para a linguagem fictícia Pascal--., uma versão simplificada da linguagem Pascal.
+Este projeto contempla as **etapas 1, 2, 3 e 4 do Trabalho Prático** da disciplina de Compiladores. Foram implementadas as funcionalidades de **análise léxica, análise sintática** e um **interpretador para uma linguagem intermediária**, simulando uma máquina virtual capaz de executar instruções em forma de tuplas.
 
 ## 🧠 Objetivo
 
-Implementar um compilador parcial para Pascal--, realizando a leitura de um código-fonte `.pmm` e analisando se ele é válido segundo as regras léxicas e sintáticas da linguagem.
+Implementar um compilador parcial para Pascal--, realizando a leitura de um código-fonte `.pmm`, analisando sua validade léxica e sintática, e posteriormente **interpretando uma representação intermediária em tuplas**.
 
+---
 
 ## 📦 Módulos do Projeto
 
@@ -26,8 +26,6 @@ Token: KEYWORD, Lexema: program, Linha: 1, Coluna: 1
 Token: IDENTIFIER, Lexema: exemplo, Linha: 1, Coluna: 9
 ```
 
-**Erros léxicos** também são detectados e informados com a posição do erro.
-
 ---
 
 ### 🔸 Módulo 2 — Analisador Sintático
@@ -39,48 +37,74 @@ Verifica se os tokens formam uma estrutura sintaticamente válida, com base na *
 Erro sintático na linha 10, coluna 5: esperado 'end' antes de 'else'
 ```
 
-## 🗂 Estrutura do Projeto
+---
 
-- `main.py`: Ponto de entrada do projeto (executa analisador léxico e sintático).
-- `analyzer/`: Código do analisador léxico e sintático.
-- `lista1/`: Arquivos de teste `.pmm`. 
+### 🔹 Módulo 3 — Interpretador para Linguagem Intermediária
+
+Foi implementado um **interpretador** para executar listas de **tuplas de instruções**, que simulam um código intermediário. Cada tupla representa uma operação como soma, subtração, atribuição, saltos condicionais, leitura, escrita, entre outras.
+
+**Exemplo de instruções:**
+```python
+[
+    ("=", "a", 10, None),
+    ("=", "b", 5, None),
+    ("+", "c", "a", "b"),
+    ("CALL", "PRINT", "c", None)
+]
+```
+
+**Funcionalidades suportadas:**
+- Operações aritméticas, lógicas e relacionais
+- Atribuições e operadores unários
+- Saltos condicionais (`IF`) e incondicionais (`JUMP`)
+- Labels e controle de fluxo
+- Comandos de entrada (`SCAN`) e saída (`PRINT`)
+- Tratamento de variáveis não inicializadas e labels inexistentes
+
+---
 
 ## ⚙️ Como Executar
 
-1. Certifique-se de ter **Python 3** instalado.
-2. No terminal, execute:
+1. Certifique-se de estar na branch `Modulo3`:
 
 ```bash
-python3 main.py codigos_pascal/<arquivo>.pmm
+git checkout Modulo3
 ```
 
-3. O analisador vai imprimir os tokens encontrados e a análise sintárica é feita, em caso de erros é exibido o motivo do erro e a linha e coluna do arquivo `.pmm` em que houve o erro
-4. Para limpar o terminal basta rodar o comando: `clear`
-   
-## ✅ Funcionalidades Implementadas
+2. Execute o interpretador com um arquivo `.py` contendo a lista de tuplas:
 
-- Identificação correta de todos os tokens da linguagem Pascal--
-- Detecção de tokens inválidos com mensagens de erro e posição no código
-- Entrada via linha de comando com nome do arquivo
-- Modularização do código para facilitar manutenção e legibilidade
-- Analisador sintático para verificar a estrutura correta do código Pascal, com detecção de erros de sintaxe com mensagens detalhadas.
-
-<!-- 
-## 📦 Resultado Esperado
-
-Ao executar o analisador em um código `.pmm`, o retorno será uma lista de tokens válidos encontrados, ou uma mensagem de erro informando onde há um token inválido. Exemplo:
-
+```bash
+python main.py caminho/do/arquivo.py
 ```
-Token: KEYWORD, Lexema: program, Linha: 1, Coluna: 1  
-Token: IDENTIFIER, Lexema: exemplo, Linha: 1, Coluna: 9  
-...  
-Erro: Token inválido "$" na linha 5, coluna 12
+
+Exemplo:
+
+```bash
+python main.py tests/teste_if.py
 ```
--->
+
+---
+
+## ✅ Funcionalidades Gerais
+
+- Análise léxica com identificação e erro de tokens
+- Análise sintática com verificação da estrutura do código
+- Execução de código intermediário baseado em tuplas
+- Simulação real de programas com entrada e saída via terminal
+- Modularização clara e legibilidade do código
+- Detecção e mensagens claras de erro
+
+---
+
 ## 📌 Conclusão
 
 O projeto foi dividido em etapas para facilitar o aprendizado e a organização. Primeiro, implementamos a análise léxica, depois partimos para a análise sintática. Isso nos ajudou a compreender melhor como um compilador identifica e interpreta o código-fonte em etapas bem definidas.
 
+Na terceira e quarta etapas, avançamos para a criação de um interpretador capaz de executar uma representação intermediária do código por meio de tuplas. Essa fase foi fundamental para entendermos o funcionamento interno de uma máquina virtual simples, desde o controle de fluxo até operações aritméticas, lógicas e de entrada/saída.
+
+Também testamos o interpretador com programas completos escritos em Pascal--, que simulam a execução real: solicitando informações ao usuário com `readln` e exibindo os resultados com `writeln`. Isso tornou possível validar que a conversão para o código intermediário e sua execução no interpretador estão funcionando corretamente, inclusive com interação via terminal.
+
+---
 
 ## Contato
 <div>
