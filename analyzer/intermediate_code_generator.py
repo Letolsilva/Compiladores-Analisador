@@ -44,8 +44,12 @@ class IntermediateCodeGenerator:
         self.generate_from_ast(node.stmt_list)
 
     def gen_DeclarationNode(self, node):
-        # Não gera código para declaração
-        pass
+        if node.var_type == "STRING":
+            for identifier in node.identifiers:
+                self.emit("ATT", identifier.name, '""', "NONE")
+        else:
+            for identifier in node.identifiers:
+                self.emit("ATT", identifier.name, "0", "NONE")
 
     def gen_BlockNode(self, node):
         for stmt in node.stmt_list:
