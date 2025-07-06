@@ -6,6 +6,8 @@ class IntermediateCodeGenerator:
         self.instructions: List[Tuple[str, str, str, str]] = []
         self.temp_count = 0
         self.label_count = 0
+        self.loop_start_labels = []  
+        self.loop_end_labels = [] 
 
     def new_temp(self) -> str:
         self.temp_count += 1
@@ -98,6 +100,8 @@ class IntermediateCodeGenerator:
         start_label = self.new_label()
         true_label = self.new_label()
         end_label = self.new_label()
+        self.loop_start_labels.append(start_label)
+        self.loop_end_labels.append(end_label)
         self.emit("LABEL", start_label, "NONE", "NONE")
         cond_temp = self.generate_from_ast(node.condition)
         self.emit("IF", cond_temp, true_label, end_label)
@@ -105,15 +109,18 @@ class IntermediateCodeGenerator:
         self.generate_from_ast(node.stmt)
         self.emit("JUMP", start_label, "NONE", "NONE")
         self.emit("LABEL", end_label, "NONE", "NONE")
+        self.loop_start_labels.pop()
+        self.loop_end_labels.pop()
 
     def gen_ForNode(self, node):
-        # Supondo que node.assignment é AssignmentNode (ex: i := 0)
         self.generate_from_ast(node.assignment)
         start_label = self.new_label()
         body_label = self.new_label()
         end_label = self.new_label()
         var_name = node.assignment.identifier.name
         end_value = self.generate_from_ast(node.end_value)
+        self.loop_start_labels.append(start_label)
+        self.loop_end_labels.append(end_label)
         self.emit("LABEL", start_label, "NONE", "NONE")
         temp = self.new_temp()
         self.emit("LTE", temp, var_name, end_value)
@@ -125,6 +132,8 @@ class IntermediateCodeGenerator:
         self.emit("ATT", var_name, temp2, "NONE")
         self.emit("JUMP", start_label, "NONE", "NONE")
         self.emit("LABEL", end_label, "NONE", "NONE")
+        self.loop_start_labels.pop()
+        self.loop_end_labels.pop()
 
     def gen_IOStmtNode(self, node):
         for arg in node.args:
@@ -137,12 +146,14 @@ class IntermediateCodeGenerator:
             self.emit("CALL", "WRITE", "\\n", "NONE")
 
     def gen_BreakNode(self, node):
-        # Precisa de contexto de loop para saber o label de saída
-        self.emit("JUMP", "END_LOOP", "NONE", "NONE")
+        if not self.loop_end_labels:
+            raise Exception("break fora de loop")
+        self.emit("JUMP", self.loop_end_labels[-1], "NONE", "NONE")
 
     def gen_ContinueNode(self, node):
-        # Precisa de contexto de loop para saber o label de início
-        self.emit("JUMP", "START_LOOP", "NONE", "NONE")
+        if not self.loop_start_labels:
+            raise Exception("continue fora de loop")
+        self.emit("JUMP", self.loop_start_labels[-1], "NONE", "NONE")
 
     def gen_EmptyNode(self, node):
         pass
