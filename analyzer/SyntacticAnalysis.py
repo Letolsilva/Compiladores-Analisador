@@ -324,6 +324,10 @@ class SyntacticAnalysis:
             return LiteralNode(self.tokens[self.current - 1].value, "DECIMAL")
         elif self.match("FLOAT"):
             return LiteralNode(self.tokens[self.current - 1].value, "FLOAT")
+        elif self.match("HEXADECIMAL"):
+            return LiteralNode(self.tokens[self.current - 1].value, "HEXADECIMAL")
+        elif self.match("OCTAL"):
+            return LiteralNode(self.tokens[self.current - 1].value, "OCTAL")
         elif self.match("IDENTIFIER"):
             token = self.tokens[self.current - 1]
             return IdentifierNode(token.value, token.line, token.column)

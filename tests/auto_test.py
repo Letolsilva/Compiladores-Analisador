@@ -2,10 +2,6 @@ import sys
 import os
 import subprocess
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from main import executar_codigo
-
 def test_run(pas_file, input_file):
     try:
         with open(input_file, 'r') as input_data:

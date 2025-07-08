@@ -1,9 +1,9 @@
 class IntermediateCodeExecutor:
     def __init__(self, instructions):
         self.instructions = instructions
-        self.variables = {}  # Dicionário de variáveis (x, y, T1, T2, etc)
-        self.labels = self._map_labels()  # Mapa: label -> índice da instrução
-        self.pc = 0  # Program Counter (posição atual de execução)
+        self.variables = {}  
+        self.labels = self._map_labels() 
+        self.pc = 0  
         self.output = "" # Para armazenar a saida e fazer testes depois
 
     def _map_labels(self):
@@ -59,7 +59,11 @@ class IntermediateCodeExecutor:
                 elif arg1 == "READ":
                     user_input = input()
                     try:
-                        if '.' in user_input:
+                        if self._is_hexadecimal(user_input):
+                            self.variables[arg2] = self._convert_hexadecimal(user_input)
+                        elif self._is_octal(user_input):
+                            self.variables[arg2] = self._convert_octal(user_input)
+                        elif '.' in user_input:
                             self.variables[arg2] = float(user_input)
                         else:
                             self.variables[arg2] = int(user_input)
@@ -77,18 +81,34 @@ class IntermediateCodeExecutor:
 
     
     def _get_value(self, arg):
-        if arg.isdigit() or (arg.startswith('-') and arg[1:].isdigit()):
+        if self._is_hexadecimal(arg):
+            return self._convert_hexadecimal(arg)
+        
+        elif self._is_octal(arg):
+            return self._convert_octal(arg)
+        
+        elif arg.isdigit() or (arg.startswith('-') and arg[1:].isdigit()):
             return int(arg)
+        
+        elif self._is_float(arg):
+            return float(arg)
+        
         elif (arg.startswith('"') and arg.endswith('"')) or (arg.startswith("'") and arg.endswith("'")):
             literal = arg[1:-1]
             try:
-                if '.' in literal:
+                if self._is_hexadecimal(literal):
+                    return self._convert_hexadecimal(literal)
+                elif self._is_octal(literal):
+                    return self._convert_octal(literal)
+                elif '.' in literal:
                     return float(literal)
                 return int(literal)
             except ValueError:
                 return literal 
+        
         elif arg in self.variables:
             return self.variables[arg]
+        
         else:
             return arg
 
@@ -120,4 +140,43 @@ class IntermediateCodeExecutor:
             return int(bool(val1) or bool(val2))
         elif op == "EQUALS":
             return int(val1 == val2)
+
+    def _is_hexadecimal(self, arg):
+        if isinstance(arg, str):
+            if arg.startswith('-'):
+                return arg[1:].startswith(('0x', '0X')) and len(arg) > 3
+            return arg.startswith(('0x', '0X')) and len(arg) > 2
+        return False
+
+    def _is_octal(self, arg):
+        if isinstance(arg, str):
+            if arg.startswith('-'):
+                test_arg = arg[1:]
+            else:
+                test_arg = arg
+            
+            if test_arg.startswith('0') and len(test_arg) > 1:
+                return all(c in '01234567' for c in test_arg[1:]) and not any(c in '89' for c in test_arg)
+        return False
+
+    def _is_float(self, arg):
+        if isinstance(arg, str):
+            try:
+                float(arg)
+                return '.' in arg
+            except ValueError:
+                return False
+        return False
+
+    def _convert_hexadecimal(self, arg):
+        try:
+            return int(arg, 16)
+        except ValueError:
+            raise Exception(f"Erro ao converter hexadecimal: {arg}")
+
+    def _convert_octal(self, arg):
+        try:
+            return int(arg, 8)
+        except ValueError:
+            raise Exception(f"Erro ao converter octal: {arg}")
 
