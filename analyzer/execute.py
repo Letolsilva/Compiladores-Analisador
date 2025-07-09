@@ -1,7 +1,7 @@
 class IntermediateCodeExecutor:
     def __init__(self, instructions):
         self.instructions = instructions
-        self.variables = {}  
+        self.variables = {}  # {nome: {'value': valor, 'type': tipo}}
         self.labels = self._map_labels() 
         self.pc = 0  
         self.output = "" # Para armazenar a saida e fazer testes depois
@@ -14,6 +14,43 @@ class IntermediateCodeExecutor:
                 labels[arg1] = idx
         return labels
 
+    def _get_type(self, value):
+
+        if isinstance(value, bool):
+            return 'boolean'
+        elif isinstance(value, int):
+            return 'integer'
+        elif isinstance(value, float):
+            return 'real'
+        elif isinstance(value, str):
+            return 'string'
+        else:
+            return 'unknown'
+
+    def _set_variable(self, var_name, value):
+
+        new_type = self._get_type(value)
+        
+        if var_name in self.variables:
+            current_type = self.variables[var_name]['type']
+            
+            if current_type == 'string':
+                value = str(value)
+                new_type = 'string'
+            
+            elif current_type == 'real' and new_type == 'integer':
+                value = float(value)
+                new_type = 'real'
+            
+            elif current_type in ['integer', 'real', 'boolean'] and new_type == 'string':
+                raise Exception(f"Erro de tipo: Não é possível atribuir string a variável '{var_name}' do tipo {current_type}")
+
+            elif current_type != new_type:
+                raise Exception(f"Erro de tipo: Variável '{var_name}' é do tipo {current_type}, mas tentou atribuir {new_type}")
+        
+        self.variables[var_name] = {'value': value, 'type': new_type}
+
+
     def run(self):
         while self.pc < len(self.instructions):
             op, arg1, arg2, res = self.instructions[self.pc]
@@ -21,17 +58,19 @@ class IntermediateCodeExecutor:
             #print(f"\n[{self.pc+1}] Executando: {op}, {arg1}, {arg2}, {res}")
 
             if op == "ATT":
-                self.variables[arg1] = self._get_value(arg2)
+                value = self._get_value(arg2)
+                self._set_variable(arg1, value)
 
             elif op in {"ADD", "SUB", "MUL", "DIV", "LT", "GT", "LTE", "GTE", "AND", "OR", "EQUALS", "MOD", "INT_DIV"}:
                 val1 = self._get_value(arg2)
                 val2 = self._get_value(res)
                 result = self._execute_binary(op, val1, val2)
-                self.variables[arg1] = result
+                self._set_variable(arg1, result)
 
             elif op == "NOT":
                 val = self._get_value(arg2)
-                self.variables[arg1] = int(not val)
+                result = int(not val)
+                self._set_variable(arg1, result)
 
             elif op == "IF":
                 condition = self._get_value(arg1)
@@ -60,15 +99,17 @@ class IntermediateCodeExecutor:
                     user_input = input()
                     try:
                         if self._is_hexadecimal(user_input):
-                            self.variables[arg2] = self._convert_hexadecimal(user_input)
+                            value = self._convert_hexadecimal(user_input)
                         elif self._is_octal(user_input):
-                            self.variables[arg2] = self._convert_octal(user_input)
+                            value = self._convert_octal(user_input)
                         elif '.' in user_input:
-                            self.variables[arg2] = float(user_input)
+                            value = float(user_input)
                         else:
-                            self.variables[arg2] = int(user_input)
+                            value = int(user_input)
                     except ValueError:
-                        self.variables[arg2] = user_input
+                        value = user_input
+                    
+                    self._set_variable(arg2, value)
 
             elif op == "LABEL":
                 pass  
@@ -107,11 +148,10 @@ class IntermediateCodeExecutor:
                 return literal 
         
         elif arg in self.variables:
-            return self.variables[arg]
+            return self.variables[arg]['value']
         
         else:
             return arg
-
 
     def _execute_binary(self, op, val1, val2):
         if op == "ADD":
